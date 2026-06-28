@@ -59,13 +59,16 @@ export class Grid {
     }
   }
 
-  // Clear ALL cells belonging to ownerId (for full death cleanup)
-  clearAllOwner(ownerId: number): void {
+  // Clear ALL cells belonging to ownerId and return their positions
+  clearAllOwner(ownerId: number): { x: number; y: number }[] {
+    const cleared: { x: number; y: number }[] = [];
     for (let i = 0; i < this.data.length; i++) {
       if ((this.data[i] >> 2) === ownerId) {
+        cleared.push({ x: i % GRID_SIZE, y: Math.floor(i / GRID_SIZE) });
         this.data[i] = 0;
       }
     }
+    return cleared;
   }
 
   reset(): void {

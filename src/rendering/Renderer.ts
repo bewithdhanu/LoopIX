@@ -3,9 +3,11 @@ import { GridRenderer } from './GridRenderer';
 import { EntityRenderer } from './EntityRenderer';
 import { MinimapRenderer } from './MinimapRenderer';
 import { HUDRenderer } from './HUDRenderer';
+import { AnimationSystem } from './AnimationSystem';
 import { LeaderboardSystem } from '../systems/LeaderboardSystem';
 import { Grid } from '../core/Grid';
 import { Entity } from '../entities/Entity';
+import { TICK_MS } from '../constants';
 
 export class Renderer {
   private canvas: HTMLCanvasElement;
@@ -17,6 +19,7 @@ export class Renderer {
   private minimapRenderer: MinimapRenderer;
   hudRenderer: HUDRenderer;
   private leaderboard: LeaderboardSystem;
+  private anim: AnimationSystem;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -27,6 +30,7 @@ export class Renderer {
     this.minimapRenderer = new MinimapRenderer();
     this.hudRenderer = new HUDRenderer();
     this.leaderboard = new LeaderboardSystem();
+    this.anim = new AnimationSystem();
 
     this.resize();
     window.addEventListener('resize', () => this.resize());
@@ -49,6 +53,14 @@ export class Renderer {
     this.gridRenderer.markDirty();
   }
 
+  addDeathBurst(wx: number, wy: number, color: string): void {
+    this.anim.addDeathBurst(wx, wy, color);
+  }
+
+  addCaptureFlash(minX: number, minY: number, maxX: number, maxY: number, color: string): void {
+    this.anim.addCaptureFlash(minX, minY, maxX, maxY, color);
+  }
+
   frame(alpha: number, grid: Grid, entities: Entity[], playerId: number): void {
     const ctx = this.ctx;
     const w = this.camera.canvasW;
@@ -60,10 +72,13 @@ export class Renderer {
     }
     this.camera.update(0.12);
 
-    ctx.fillStyle = '#1a1a2e';
+    this.anim.update(TICK_MS / 1000);
+
+    ctx.fillStyle = '#16213e';
     ctx.fillRect(0, 0, w, h);
 
     this.gridRenderer.draw(ctx, this.camera, grid, entities);
+    this.anim.draw(ctx, this.camera);
     this.entityRenderer.draw(ctx, entities, this.camera, alpha);
 
     if (player) {

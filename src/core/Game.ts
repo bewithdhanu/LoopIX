@@ -142,6 +142,17 @@ export class Game {
 
   private setupSystems(): void {
     this.movement.onTrailClosed = (event) => {
+      // Capture flash: compute bounding box of entity trail before capture
+      const trail = event.entity.trail;
+      if (trail.length > 0) {
+        let minX = trail[0].x, maxX = trail[0].x;
+        let minY = trail[0].y, maxY = trail[0].y;
+        for (const c of trail) {
+          if (c.x < minX) minX = c.x; if (c.x > maxX) maxX = c.x;
+          if (c.y < minY) minY = c.y; if (c.y > maxY) maxY = c.y;
+        }
+        this.renderer.addCaptureFlash(minX, minY, maxX, maxY, event.entity.color);
+      }
       this.capture.handle(event, this.grid, this.entities);
       this.renderer.markGridDirty();
     };
@@ -150,15 +161,9 @@ export class Game {
       this.handleDeath(entity, null);
     };
 
-    this.capture.onCapture = (_entityId, _gained) => {
-      this.renderer.markGridDirty();
-    };
-
     this.capture.onTrailDestroyed = (victimId) => {
       const victim = this.entities.find(e => e.id === victimId);
-      if (victim && victim.isAlive()) {
-        this.handleDeath(victim, null);
-      }
+      if (victim) this.handleDeath(victim, null);
     };
 
     this.collision.onKill = (event: KillEvent) => {
@@ -174,19 +179,27 @@ export class Game {
   }
 
   private handleDeath(entity: Entity, killer: Entity | null): void {
-    if (!entity.isAlive()) return;
+    // Don't double-clean: skip if entity was already fully cleaned up
+    if (entity.state === EntityState.Dead && entity.territoryCount === 0 && entity.trail.length === 0) return;
+
+    // Death burst animation at head position
+    this.renderer.addDeathBurst(entity.x, entity.y, entity.color);
 
     entity.state = EntityState.Dead;
     entity.respawnTimer = 0;
 
+    // Capture territory % before clearing
+    const finalTerritory = Math.round(entity.territoryCount / (GRID_SIZE * GRID_SIZE) * 1000) / 10;
+    const finalKills = entity.killCount;
+
+    // Clear grid immediately so the territory disappears on next frame
     this.grid.clearAllOwner(entity.id);
     entity.trail = [];
     entity.territoryCount = 0;
     this.renderer.markGridDirty();
 
     if (entity === this.player) {
-      const territory = Math.round((entity.killCount / (GRID_SIZE * GRID_SIZE)) * 1000) / 10;
-      this.onDeath?.(killer?.name ?? null, territory, entity.killCount);
+      this.onDeath?.(killer?.name ?? null, finalTerritory, finalKills);
       this.keyboard.detach();
       this.touch.detach(this.canvas);
     }

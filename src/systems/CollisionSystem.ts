@@ -18,16 +18,11 @@ export class CollisionSystem {
       const cellType = grid.getType(x, y);
       const cellOwner = grid.getOwner(x, y);
 
-      if (cellType === CellType.Trail) {
-        if (cellOwner === entity.id) {
-          // Hit own trail → die
-          this.killEntity(entity, null);
-        } else {
-          // Hit another entity's trail → that entity dies
-          const victim = entities.find(e => e.id === cellOwner);
-          if (victim && victim.isAlive()) {
-            this.killEntity(victim, entity);
-          }
+      if (cellType === CellType.Trail && cellOwner !== entity.id) {
+        // Head on another entity's trail → that trail owner dies
+        const victim = entities.find(e => e.id === cellOwner);
+        if (victim && victim.isAlive()) {
+          this.killEntity(victim, entity);
         }
       }
     }

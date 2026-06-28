@@ -66,9 +66,12 @@ export class MovementSystem {
     const curOwner = grid.getOwner(cx, cy);
     const onOwnTerritory = curOwner === entity.id && curType === CellType.Territory;
 
-    // If leaving territory (or extending trail), write trail on current cell
+    // Write trail on current cell when leaving own territory or extending trail.
+    // Skip if already own trail (crossing own trail is allowed — no duplicate entry).
     if (!onOwnTerritory || entity.trail.length > 0) {
-      if (!(curOwner === entity.id && curType === CellType.Territory)) {
+      const isOwnTerritory = curOwner === entity.id && curType === CellType.Territory;
+      const isOwnTrail     = curOwner === entity.id && curType === CellType.Trail;
+      if (!isOwnTerritory && !isOwnTrail) {
         grid.setTrail(cx, cy, entity.id);
         entity.trail.push({ x: cx, y: cy });
       }

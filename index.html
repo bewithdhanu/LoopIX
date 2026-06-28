@@ -12,13 +12,6 @@
     /* Three.js canvas — full viewport */
     #game { display: block; width: 100% !important; height: 100% !important; }
 
-    /* HUD canvas — pixel-perfect 2D overlay, no pointer interaction */
-    #hud {
-      position: absolute; inset: 0;
-      pointer-events: none;
-      display: block;
-    }
-
     .overlay {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
@@ -77,12 +70,11 @@
 
     .subtitle { font-size: 0.82rem; color: rgba(255,255,255,0.35); margin-top: 22px; letter-spacing: 1px; }
   </style>
-  <script type="module" crossorigin src="/LoopIX/assets/index-CToA5uLT.js"></script>
+  <script type="module" crossorigin src="/LoopIX/assets/index-BZGGZLEY.js"></script>
 </head>
 <body>
   <div id="app">
     <canvas id="game"></canvas>
-    <canvas id="hud"></canvas>
 
     <div id="start-screen" class="overlay">
       <div class="panel">

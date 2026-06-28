@@ -6,64 +6,83 @@
   <title>Paper.io 2</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #1a1a2e; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+    body { background: #0d1428; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
     #app { position: relative; width: 100vw; height: 100vh; }
-    canvas { display: block; }
+
+    /* Three.js canvas — full viewport */
+    #game { display: block; width: 100% !important; height: 100% !important; }
+
+    /* HUD canvas — pixel-perfect 2D overlay, no pointer interaction */
+    #hud {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      display: block;
+    }
 
     .overlay {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      background: rgba(10,10,30,0.85);
-      z-index: 10;
+      background: rgba(8,12,30,0.88);
+      z-index: 20;
+      backdrop-filter: blur(4px);
     }
     .overlay.hidden { display: none; }
 
     .panel {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
-      padding: 40px 50px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 44px 56px;
       text-align: center;
       color: #fff;
-      min-width: 320px;
+      min-width: 340px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
-    .panel h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px; }
-    .panel h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 24px; }
-    .panel p { color: rgba(255,255,255,0.6); margin-bottom: 24px; font-size: 0.95rem; }
-    .panel .stat { font-size: 1.1rem; margin: 8px 0; color: rgba(255,255,255,0.85); }
-    .panel .stat span { font-weight: 700; color: #fff; }
+    .panel h1 {
+      font-size: 3rem; font-weight: 900; letter-spacing: 4px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #ffffff, #a0c4ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .panel h2 { font-size: 1.9rem; font-weight: 800; margin-bottom: 28px; letter-spacing: 1px; }
+    .panel p { color: rgba(255,255,255,0.55); margin-bottom: 28px; font-size: 0.95rem; }
+    .panel .stat { font-size: 1.05rem; margin: 10px 0; color: rgba(255,255,255,0.75); }
+    .panel .stat span { font-weight: 800; color: #fff; }
 
     input[type="text"] {
-      width: 100%; padding: 12px 16px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 8px; color: #fff;
+      width: 100%; padding: 13px 18px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px; color: #fff;
       font-size: 1rem; outline: none;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
+      transition: border-color 0.2s;
     }
-    input[type="text"]::placeholder { color: rgba(255,255,255,0.4); }
-    input[type="text"]:focus { border-color: rgba(255,255,255,0.6); }
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.35); }
+    input[type="text"]:focus { border-color: rgba(108,99,255,0.8); }
 
     button {
-      padding: 14px 40px;
+      padding: 14px 44px;
       background: linear-gradient(135deg, #6c63ff, #4facfe);
-      border: none; border-radius: 8px;
-      color: #fff; font-size: 1.1rem; font-weight: 700;
-      cursor: pointer; letter-spacing: 1px;
+      border: none; border-radius: 10px;
+      color: #fff; font-size: 1.1rem; font-weight: 800;
+      cursor: pointer; letter-spacing: 2px;
       transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.4);
     }
-    button:hover { opacity: 0.9; transform: scale(1.02); }
-    button:active { transform: scale(0.98); }
+    button:hover { opacity: 0.92; transform: scale(1.03); }
+    button:active { transform: scale(0.97); }
 
-    .subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-top: 20px; }
+    .subtitle { font-size: 0.82rem; color: rgba(255,255,255,0.35); margin-top: 22px; letter-spacing: 1px; }
   </style>
-  <script type="module" crossorigin src="/LoopIX/assets/index-yCCESj7c.js"></script>
+  <script type="module" crossorigin src="/LoopIX/assets/index-CToA5uLT.js"></script>
 </head>
 <body>
   <div id="app">
     <canvas id="game"></canvas>
+    <canvas id="hud"></canvas>
 
     <div id="start-screen" class="overlay">
       <div class="panel">
@@ -72,7 +91,7 @@
         <input type="text" id="player-name" maxlength="16" placeholder="Enter your name..." />
         <br />
         <button id="play-btn">PLAY</button>
-        <p class="subtitle">WASD / Arrow Keys &nbsp;&middot;&nbsp; Mobile: Swipe</p>
+        <p class="subtitle">WASD / ARROW KEYS &nbsp;&middot;&nbsp; MOBILE: SWIPE</p>
       </div>
     </div>
 
